@@ -1,6 +1,11 @@
 @BinanceCryptoPriceAPI_HostAddress = http://localhost:5228
 
-GET {{BinanceCryptoPriceAPI_HostAddress}}/weatherforecast/
+GET {{BinanceCryptoPriceAPI_HostAddress}}/api/BTCUSDT/24hAvgPrice
 Accept: application/json
+
+###
+
+GET {{BinanceCryptoPriceAPI_HostAddress}}/api/BTCUSDT/24hAvgPrice
+Accept: application/xml
 
 ###
