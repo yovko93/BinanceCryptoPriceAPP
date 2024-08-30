@@ -24,7 +24,6 @@
 
         #region Get
         [HttpGet("{symbol}/24hAvgPrice")]
-        [Produces("application/json", "application/xml")]
         public async Task<IActionResult> Get24hAvgPrice(string symbol)
         {
             var averagePrice = await _priceService.Get24hAvgPrice(symbol);
@@ -32,31 +31,19 @@
             var result = new PriceResult { Symbol = symbol, AveragePrice = averagePrice };
 
             return Ok(result);
-
-            //if (Request.Headers["Accept"] == "application/xml")
-            //{
-            //    // Return XML response
-            //    var priceResult = JsonConvert.SerializeObject(result);
-            //    var xmlResult = JsonConvert.DeserializeXmlNode(priceResult, "PriceResult");
-            //    return Ok(xmlResult);
-            //}
-            //else
-            //{
-            //    // return JSON response
-            //    return Ok(result);
-            //}
         }
 
         [HttpGet("{symbol}/SimpleMovingAverage")]
         public async Task<IActionResult> GetSimpleMovingAverage(
-                                                                [BindRequired] string symbol,
-                                                                [BindRequired, FromQuery(Name = "amount_of_data_points")] int n,
-                                                                [BindRequired, FromQuery(Name = "time_period")] string p,
-                                                                [FromQuery(Name = "start_date YYYY-MM-DD")] DateTime? s)
+                                                                string symbol,
+                                                                [BindRequired, FromQuery(Name = "n")] int numberOfDataPoints,
+                                                                [BindRequired, FromQuery(Name = "p")] string timePeriod,
+                                                                [FromQuery(Name = "s")] DateTime? startDateTime)
         {
-            var sma = await _priceService.GetSimpleMovingAverage(symbol, n, p, s);
+            var sma = await _priceService.GetSimpleMovingAverage(symbol, numberOfDataPoints, timePeriod, startDateTime);
 
-            return Ok();
+            var smaResult = new SMAResult { Symbol = symbol, SMAAveragePrice = sma };
+            return Ok(smaResult);
         }
         #endregion
     }
