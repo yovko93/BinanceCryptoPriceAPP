@@ -20,6 +20,8 @@ builder.Services.AddControllers()
 
 builder.Services.AddScoped<IPriceService, PriceService>();
 
+builder.Services.AddMemoryCache();
+
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 

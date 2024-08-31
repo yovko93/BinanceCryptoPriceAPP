@@ -4,15 +4,22 @@
     using Application.Interfaces;
     using Data.Context;
     using Microsoft.EntityFrameworkCore;
+    using Microsoft.Extensions.Caching.Memory;
     #endregion
 
     public class PriceService : IPriceService
     {
-        private readonly AppDbContext _context;
+        private static readonly TimeSpan CacheDuration = TimeSpan.FromMinutes(1); // Cache duration
 
-        public PriceService(AppDbContext context)
+        private readonly AppDbContext _context;
+        private readonly IMemoryCache _cache;
+
+        public PriceService(
+            AppDbContext context,
+            IMemoryCache cache)
         {
             _context = context;
+            _cache = cache;
         }
 
         public async Task<decimal> Get24hAvgPrice(string symbol)
@@ -24,6 +31,15 @@
 
             try
             {
+                // Create a cache key
+                string cacheKey = $"{symbol}_24hAvgPrice";
+
+                // Check if the result is already cached
+                if (_cache.TryGetValue(cacheKey, out decimal cachedAveragePrice))
+                {
+                    return cachedAveragePrice;
+                }
+
                 // Get the latest price data timestamp
                 var lastPriceData = await _context.Prices
                     .AsNoTracking()
@@ -45,6 +61,9 @@
                     .Where(p => p.Symbol == symbol && p.Timestamp >= start && p.Timestamp <= now)
                     .AverageAsync(p => (decimal)p.Price);
 
+                // Store the result in cache
+                _cache.Set(symbol, averagePrice, CacheDuration);
+
                 return averagePrice;
             }
             catch (InvalidOperationException e)
@@ -61,6 +80,15 @@
         {
             try
             {
+                // Create a cache key
+                string cacheKey = $"{symbol}_{n}_{timePeriod}_{startDate?.ToString("yyyyMMdd")}";
+
+                // Check if the result is already cached
+                if (_cache.TryGetValue(cacheKey, out decimal cachedSma))
+                {
+                    return cachedSma;
+                }
+
                 // Validate and Determine the interval for each data point based on the timePeriod
                 TimeSpan interval = timePeriod switch
                 {
@@ -104,6 +132,9 @@
 
                 // Calculate the SMA
                 decimal sma = prices.Average();
+
+                // Store the result in cache
+                _cache.Set(cacheKey, sma, CacheDuration);
 
                 return sma;
             }
