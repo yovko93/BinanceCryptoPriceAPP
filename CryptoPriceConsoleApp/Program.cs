@@ -5,6 +5,7 @@
     using Application.Services;
     using Data.Context;
     using Microsoft.EntityFrameworkCore;
+    using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Hosting;
     using Microsoft.Extensions.Logging;
@@ -37,8 +38,9 @@
                 logging.SetMinimumLevel(LogLevel.Warning); // Log only warnings and errors
             }).ConfigureServices((context, services) =>
             {
+                var connectionString = context.Configuration.GetConnectionString("DefaultConnection");
                 services.AddDbContext<AppDbContext>(options =>
-                    options.UseNpgsql("Host=localhost;Database=crypto_price_data_db;Username=myappuser;Password=mysecretpassword"));
+                    options.UseNpgsql(connectionString));
 
                 services.AddMemoryCache();
 
