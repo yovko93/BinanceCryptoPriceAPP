@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Data.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20240829134700_InitialCreate")]
-    partial class InitialCreate
+    [Migration("20240901165326_InititialCreate")]
+    partial class InititialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -25,13 +25,26 @@ namespace Data.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
-            modelBuilder.Entity("Data.Models.PriceData", b =>
+            modelBuilder.Entity("Data.Models.KlineData", b =>
                 {
                     b.Property<string>("Id")
                         .HasColumnType("text");
 
-                    b.Property<decimal>("Price")
+                    b.Property<decimal>("ClosePrice")
                         .HasColumnType("numeric");
+
+                    b.Property<string>("Interval")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<long>("KlineCloseTime")
+                        .HasColumnType("bigint");
+
+                    b.Property<long>("KlineStartTime")
+                        .HasColumnType("bigint");
+
+                    b.Property<int>("NumberOfTrades")
+                        .HasColumnType("integer");
 
                     b.Property<string>("Symbol")
                         .IsRequired()
@@ -42,7 +55,7 @@ namespace Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Prices");
+                    b.ToTable("KlineDatas");
                 });
 #pragma warning restore 612, 618
         }

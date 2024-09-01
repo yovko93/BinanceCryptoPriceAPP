@@ -12,6 +12,6 @@
         {
         }
 
-        public DbSet<PriceData> Prices { get; set; }
+        public DbSet<KlineData> KlineDatas { get; set; }
     }
 }

@@ -6,23 +6,27 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Data.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialCreate : Migration
+    public partial class InititialCreate : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
-                name: "Prices",
+                name: "KlineDatas",
                 columns: table => new
                 {
                     Id = table.Column<string>(type: "text", nullable: false),
                     Symbol = table.Column<string>(type: "text", nullable: false),
-                    Price = table.Column<decimal>(type: "numeric", nullable: false),
+                    Interval = table.Column<string>(type: "text", nullable: false),
+                    KlineStartTime = table.Column<long>(type: "bigint", nullable: false),
+                    KlineCloseTime = table.Column<long>(type: "bigint", nullable: false),
+                    ClosePrice = table.Column<decimal>(type: "numeric", nullable: false),
+                    NumberOfTrades = table.Column<int>(type: "integer", nullable: false),
                     Timestamp = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Prices", x => x.Id);
+                    table.PrimaryKey("PK_KlineDatas", x => x.Id);
                 });
         }
 
@@ -30,7 +34,7 @@ namespace Data.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "Prices");
+                name: "KlineDatas");
         }
     }
 }

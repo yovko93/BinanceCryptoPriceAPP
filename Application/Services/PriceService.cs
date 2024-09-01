@@ -5,7 +5,6 @@
     using Data.Context;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.Caching.Memory;
-    using Microsoft.Extensions.Logging;
     using Models;
     #endregion
 
@@ -46,7 +45,7 @@
                 }
 
                 // Get the latest price data timestamp
-                var lastPriceData = await _context.Prices
+                var lastPriceData = await _context.KlineDatas
                     .AsNoTracking()
                     .Where(x => x.Symbol == symbol)
                     .OrderByDescending(x => x.Timestamp)
@@ -61,10 +60,10 @@
                 var start = now.AddDays(-1);
 
                 // Calculate the average price for the symbol
-                var averagePrice = await _context.Prices
+                var averagePrice = await _context.KlineDatas
                     .AsNoTracking()
                     .Where(p => p.Symbol == symbol && p.Timestamp >= start && p.Timestamp <= now)
-                    .AverageAsync(p => (decimal)p.Price);
+                    .AverageAsync(p => (decimal)p.ClosePrice);
 
                 // Store the result in cache
                 _cache.Set(symbol, averagePrice, CacheDuration);
@@ -133,12 +132,12 @@
                 DateTime end = start.Subtract(interval * n);
 
                 // Fetch the price data for the given symbol within the time range
-                var prices = await _context.Prices
+                var prices = await _context.KlineDatas
                     .AsNoTracking()
                     .Where(p => p.Symbol == symbol && p.Timestamp <= start && p.Timestamp > end)
                     .OrderByDescending(p => p.Timestamp)
                     .Take(n)
-                    .Select(p => p.Price)
+                    .Select(p => p.ClosePrice)
                     .ToListAsync();
 
                 // Validate if we have enough data points

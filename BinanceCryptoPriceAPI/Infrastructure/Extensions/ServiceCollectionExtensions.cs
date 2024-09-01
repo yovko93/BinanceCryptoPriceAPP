@@ -23,9 +23,8 @@
 
         public static IServiceCollection AddAppServices(this IServiceCollection services)
         {
-            // Register the PriceDataCollector and WebSocket Service
-            services.AddScoped<PriceDataCollector>();
-            services.AddHostedService<BinanceWebSocketService>();
+            services.AddSingleton<BinanceWebSocketService>();
+            services.AddHostedService(provider => provider.GetRequiredService<BinanceWebSocketService>());
 
             services.AddScoped<IPriceService, PriceService>();
 
