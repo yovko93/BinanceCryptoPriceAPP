@@ -29,7 +29,6 @@
 
         private static void ConfigureServices(IServiceCollection services)
         {
-            // Register your DbContext with the appropriate options
             services.AddDbContext<AppDbContext>(options =>
                 options.UseNpgsql("Host=localhost;Database=crypto_price_data_db;Username=myappuser;Password=mysecretpassword"));
 

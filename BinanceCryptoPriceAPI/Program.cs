@@ -1,5 +1,6 @@
 using Application.Interfaces;
 using Application.Services;
+using BinanceCryptoPriceAPI.Infrastructure.Middleware;
 using Data;
 using Data.Context;
 using Microsoft.EntityFrameworkCore;
@@ -38,6 +39,8 @@ if (app.Environment.IsDevelopment())
         c.SwaggerEndpoint("/swagger/v1/swagger.json", "Binance Crypto Price API V1");
     });
 }
+
+app.UseMiddleware<GlobalExceptionHandlerMiddleware>();
 
 app.UseHttpsRedirection();
 
