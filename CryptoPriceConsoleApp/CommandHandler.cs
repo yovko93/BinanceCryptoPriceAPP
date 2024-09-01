@@ -81,9 +81,9 @@ namespace CryptoPriceConsoleApp
         {
             try
             {
-                var averagePrice = await _priceService.Get24hAvgPrice(symbol);
+                var averagePriceResult = await _priceService.Get24hAvgPrice(symbol);
 
-                Console.WriteLine($"24h Avg Price for {symbol}: {averagePrice}");
+                Console.WriteLine($"24h Avg Price for {symbol}: {averagePriceResult.Data?.AveragePrice.ToString() ?? averagePriceResult.ErrorMessage}");
             }
             catch (Exception e)
             {
@@ -95,9 +95,9 @@ namespace CryptoPriceConsoleApp
         {
             try
             {
-                var sma = await _priceService.GetSimpleMovingAverage(symbol, n, timePeriod, startDate);
+                var smaResult = await _priceService.GetSimpleMovingAverage(symbol, n, timePeriod, startDate);
 
-                Console.WriteLine($"SMA for {symbol} (n={n}, p={timePeriod}, s={startDate ?? DateTime.Now}): {sma}");
+                Console.WriteLine($"SMA for {symbol} (n={n}, p={timePeriod}, s={startDate ?? DateTime.Now}): {smaResult.Data?.SMAAveragePrice.ToString() ?? smaResult.ErrorMessage}");
             }
             catch (Exception e)
             {
