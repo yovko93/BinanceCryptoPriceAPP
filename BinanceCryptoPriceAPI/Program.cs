@@ -1,25 +1,14 @@
-using Application.Interfaces;
-using Application.Services;
+using BinanceCryptoPriceAPI.Infrastructure.Extensions;
 using BinanceCryptoPriceAPI.Infrastructure.Middleware;
 using Data;
-using Data.Context;
-using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add DbContext with PostgreSQL provider
-builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"),
-    sqlOptions => sqlOptions.CommandTimeout(300)));
-
-// Register the PriceDataCollector and WebSocket Service
-builder.Services.AddScoped<PriceDataCollector>();
-builder.Services.AddHostedService<BinanceWebSocketService>();
+builder.Services.AddAppDbContext(builder.Configuration);
+builder.Services.AddAppServices();
 
 builder.Services.AddControllers()
     .AddXmlSerializerFormatters();
-
-builder.Services.AddScoped<IPriceService, PriceService>();
 
 builder.Services.AddMemoryCache();
 
