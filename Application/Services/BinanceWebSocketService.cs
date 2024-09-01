@@ -5,6 +5,7 @@
     using Data.Models;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Hosting;
+    using Microsoft.Extensions.Logging;
     using Newtonsoft.Json.Linq;
     using System.Net.WebSockets;
     using System.Text;
@@ -17,11 +18,15 @@
         private readonly object _lock = new object();
         private CancellationTokenSource _manualCancellationSource;
         private CancellationToken _stoppingToken;
+        private readonly ILogger<BinanceWebSocketService> _logger;
 
-        public BinanceWebSocketService(IServiceProvider serviceProvider)
+        public BinanceWebSocketService(
+            IServiceProvider serviceProvider,
+            ILogger<BinanceWebSocketService> logger)
         {
             _serviceProvider = serviceProvider;
             _manualCancellationSource = new CancellationTokenSource();
+            _logger = logger;
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -37,7 +42,7 @@
             }
         }
 
-        public async Task StartAsync(CancellationToken cancellationToken)
+        public override async Task StartAsync(CancellationToken cancellationToken)
         {
             lock (_lock)
             {
@@ -112,18 +117,31 @@
                 {
                     var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
 
-                    var klineData = new KlineData
+                    try
                     {
-                        Symbol = jObject["s"]?.ToString(),
-                        Interval = jObject["k"]["i"]?.ToString(),
-                        KlineStartTime = (long)jObject["k"]["t"],
-                        KlineCloseTime = (long)jObject["k"]["T"],
-                        ClosePrice = decimal.Parse(jObject["k"]["c"]?.ToString() ?? "0"),
-                        NumberOfTrades = (int)jObject["k"]["n"],
-                    };
+                        var klineData = new KlineData
+                        {
+                            Symbol = jObject["s"]?.ToString(),
+                            Interval = jObject["k"]["i"]?.ToString(),
+                            KlineStartTime = (long)jObject["k"]["t"],
+                            KlineCloseTime = (long)jObject["k"]["T"],
+                            ClosePrice = decimal.Parse(jObject["k"]["c"]?.ToString() ?? "0"),
+                            NumberOfTrades = (int)jObject["k"]["n"],
+                        };
 
-                    dbContext.KlineDatas.Add(klineData);
-                    await dbContext.SaveChangesAsync();
+                        //var cryptoPriceDB = dbContext.KlineDatas
+                        //    .FirstOrDefault(e => e.KlineCloseTime == klineData.KlineCloseTime
+                        //                                         && e.Symbol == klineData.Symbol
+                        //                                         && e.Interval == klineData.Interval
+                        //                                         && e.ClosePrice == klineData.ClosePrice);
+
+                        dbContext.KlineDatas.Add(klineData);
+                        await dbContext.SaveChangesAsync();
+                    }
+                    catch (Exception e)
+                    {
+                        _logger.LogError(e.Message);
+                    }
                 }
             }
         }
