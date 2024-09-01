@@ -1,4 +1,4 @@
-﻿namespace BinanceCryptoPriceAPI.Dtos
+﻿namespace Models
 {
     public class SMAResult
     {

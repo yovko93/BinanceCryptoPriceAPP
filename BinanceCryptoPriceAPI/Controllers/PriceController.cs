@@ -2,7 +2,6 @@
 {
     #region Usings
     using Application.Interfaces;
-    using BinanceCryptoPriceAPI.Dtos;
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.AspNetCore.Mvc.ModelBinding;
     #endregion
@@ -26,11 +25,26 @@
         [HttpGet("{symbol}/24hAvgPrice")]
         public async Task<IActionResult> Get24hAvgPrice(string symbol)
         {
-            var averagePrice = await _priceService.Get24hAvgPrice(symbol);
+            try
+            {
+                _logger.LogInformation($"Calculate 24h average price for {symbol}");
+                var averagePriceResult = await _priceService.Get24hAvgPrice(symbol);
 
-            var result = new PriceResult { Symbol = symbol, AveragePrice = averagePrice };
-
-            return Ok(result);
+                if (averagePriceResult.IsSuccess)
+                {
+                    return Ok(averagePriceResult);
+                }
+                else
+                {
+                    _logger.LogError(averagePriceResult.Exception, averagePriceResult.ErrorMessage);
+                    return BadRequest(averagePriceResult);
+                }
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e.Message);
+                return BadRequest(new { e.Message });
+            }
         }
 
         [HttpGet("{symbol}/SimpleMovingAverage")]
@@ -40,10 +54,26 @@
                                                                 [BindRequired, FromQuery(Name = "p")] string timePeriod,
                                                                 [FromQuery(Name = "s")] DateTime? startDateTime)
         {
-            var sma = await _priceService.GetSimpleMovingAverage(symbol, numberOfDataPoints, timePeriod, startDateTime);
+            try
+            {
+                _logger.LogInformation($"Calculate SMA for {symbol}");
+                var smaResult = await _priceService.GetSimpleMovingAverage(symbol, numberOfDataPoints, timePeriod, startDateTime);
 
-            var smaResult = new SMAResult { Symbol = symbol, SMAAveragePrice = sma };
-            return Ok(smaResult);
+                if (smaResult.IsSuccess)
+                {
+                    return Ok(smaResult);
+                }
+                else
+                {
+                    _logger.LogError(smaResult.Exception, smaResult.ErrorMessage);
+                    return BadRequest(smaResult);
+                }
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e.Message);
+                return BadRequest(new { e.Message });
+            }
         }
         #endregion
     }

@@ -5,6 +5,8 @@
     using Data.Context;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.Caching.Memory;
+    using Microsoft.Extensions.Logging;
+    using Models;
     #endregion
 
     public class PriceService : IPriceService
@@ -22,22 +24,25 @@
             _cache = cache;
         }
 
-        public async Task<decimal> Get24hAvgPrice(string symbol)
+        public async Task<Result<AveragePriceResult>> Get24hAvgPrice(string symbol)
         {
             if (string.IsNullOrWhiteSpace(symbol))
             {
-                throw new ArgumentException("Symbol cannot be null or empty", nameof(symbol));
+                return Result<AveragePriceResult>.Failure("Symbol cannot be null or empty", 400);
             }
 
             try
             {
+                var result = new AveragePriceResult() { Symbol = symbol };
+
                 // Create a cache key
                 string cacheKey = $"{symbol}_24hAvgPrice";
 
                 // Check if the result is already cached
                 if (_cache.TryGetValue(cacheKey, out decimal cachedAveragePrice))
                 {
-                    return cachedAveragePrice;
+                    result.AveragePrice = cachedAveragePrice;
+                    return Result<AveragePriceResult>.Success(result);
                 }
 
                 // Get the latest price data timestamp
@@ -49,7 +54,7 @@
 
                 if (lastPriceData == null)
                 {
-                    throw new ArgumentException("No data available for the symbol", nameof(symbol));
+                    return Result<AveragePriceResult>.Failure($"No data available for the symbol - {symbol}", 400);
                 }
 
                 var now = lastPriceData.Timestamp;
@@ -64,29 +69,39 @@
                 // Store the result in cache
                 _cache.Set(symbol, averagePrice, CacheDuration);
 
-                return averagePrice;
+                result.AveragePrice = averagePrice;
+                return Result<AveragePriceResult>.Success(result);
             }
             catch (InvalidOperationException e)
             {
-                throw new InvalidOperationException("An error occurred while calculating the 24-hour average price.", e);
+                return Result<AveragePriceResult>.Failure("An error occurred while calculating the 24-hour average price.", 400);
             }
             catch (Exception e)
             {
-                throw new Exception("An unexpected error occurred. Please try again later.", e);
+                return Result<AveragePriceResult>.Failure(e.Message, 400);
             }
         }
 
-        public async Task<decimal> GetSimpleMovingAverage(string symbol, int n, string timePeriod, DateTime? startDate)
+        public async Task<Result<SMAResult>> GetSimpleMovingAverage(string symbol, int n, string timePeriod, DateTime? startDate)
         {
+            var result = new SMAResult() { Symbol = symbol };
+
             try
             {
+                if (symbol != "BTCUSDT" && symbol != "ADAUSDT" && symbol != "ETHUSDT")
+                {
+                    return Result<SMAResult>.Failure($"No data available for the symbol - {symbol}", 400);
+                }
+
+
                 // Create a cache key
                 string cacheKey = $"{symbol}_{n}_{timePeriod}_{startDate?.ToString("yyyyMMdd")}";
 
                 // Check if the result is already cached
                 if (_cache.TryGetValue(cacheKey, out decimal cachedSma))
                 {
-                    return cachedSma;
+                    result.SMAAveragePrice = cachedSma;
+                    return Result<SMAResult>.Success(result);
                 }
 
                 // Validate and Determine the interval for each data point based on the timePeriod
@@ -128,7 +143,7 @@
 
                 // Validate if we have enough data points
                 if (prices.Count < n)
-                    throw new InvalidOperationException("Not enough data points to calculate the SMA.");
+                    return Result<SMAResult>.Failure("Not enough data points to calculate the SMA.", 400);
 
                 // Calculate the SMA
                 decimal sma = prices.Average();
@@ -136,11 +151,12 @@
                 // Store the result in cache
                 _cache.Set(cacheKey, sma, CacheDuration);
 
-                return sma;
+                result.SMAAveragePrice = sma;
+                return Result<SMAResult>.Success(result);
             }
             catch (Exception e)
             {
-                throw new Exception(e.Message);
+                return Result<SMAResult>.Failure(e.Message, 400);
             }
         }
     }
