@@ -4,6 +4,11 @@ using Data;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Add logging configuration
+builder.Logging.ClearProviders();
+builder.Logging.AddConsole();
+builder.Logging.AddDebug();
+
 builder.Services.AddAppDbContext(builder.Configuration);
 builder.Services.AddAppServices();
 

@@ -16,18 +16,25 @@
 
             try
             {
+                logger.LogError("Try Initializing the database.......");
                 using (var scope = serviceProvider.CreateScope())
                 {
                     var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+                    logger.LogInformation("Ensuring database exists and applying migrations...");
 
                     if (!await context.Database.CanConnectAsync())
                     {
-                        await context.Database.EnsureCreatedAsync();
+                        logger.LogInformation("Database does not exist. Creating database...");
+                        var isCreatedDB = await context.Database.EnsureCreatedAsync();
+                        logger.LogInformation($"Is db created - {isCreatedDB}");
                     }
                     else
                     {
+                        logger.LogInformation("Database exists. Applying migrations...");
                         await context.Database.MigrateAsync();
                     }
+
+                    logger.LogInformation("Database migrations completed.");
                 }
             }
             catch (Exception ex)
