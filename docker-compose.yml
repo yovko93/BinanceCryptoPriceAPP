@@ -1,0 +1,48 @@
+services:
+  # Define the PostgreSQL service
+  postgresdb:
+    image: postgres:latest
+    container_name: postgresdb
+    environment:
+      POSTGRES_USER: "postgres"
+      POSTGRES_PASSWORD: "123456789"
+      POSTGRES_DB: crypto_price_data_db
+    ports:
+      - "5432:5432"
+    restart: always
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - cryptonetwork
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Define the API service
+  binancecryptopriceapi:
+    image: binancecryptopriceapi:latest # Tag your built Docker image
+    depends_on:
+      postgresdb:
+        condition: service_healthy
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+      - "8081:8081"
+    environment:
+    - ConnectionStrings__DefaultConnection=Host=postgresdb;Port=5432;Database=crypto_price_data_db;Username=postgres;Password=123456789;
+    networks:
+      - cryptonetwork
+
+# Define the shared network
+networks:
+  cryptonetwork:
+    driver: bridge
+
+# Define volumes for persistent storage
+volumes:
+  postgres_data:
+    
