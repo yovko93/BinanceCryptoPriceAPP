@@ -66,7 +66,7 @@
                     .AverageAsync(p => (decimal)p.ClosePrice);
 
                 // Store the result in cache
-                _cache.Set(symbol, averagePrice, CacheDuration);
+                _cache.Set(cacheKey, averagePrice, CacheDuration);
 
                 result.AveragePrice = averagePrice;
                 return Result<AveragePriceResult>.Success(result);
