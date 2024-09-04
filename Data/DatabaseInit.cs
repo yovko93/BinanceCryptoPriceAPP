@@ -16,7 +16,7 @@
 
             try
             {
-                logger.LogError("Try Initializing the database.......");
+                logger.LogInformation("Try Initializing the database.......");
                 using (var scope = serviceProvider.CreateScope())
                 {
                     var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
