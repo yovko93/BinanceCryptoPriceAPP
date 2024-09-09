@@ -18,6 +18,9 @@
             var host = CreateHostBuilder(args).Build();
             using (var scope = host.Services.CreateScope())
             {
+                var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+                await dbContext.Database.MigrateAsync();
+
                 var commandHandler = scope.ServiceProvider.GetRequiredService<CommandHandler>();
                 var serviceProvider = scope.ServiceProvider
                           .GetServices<IHostedService>()
