@@ -2,6 +2,7 @@
 {
     #region Usings
     using Application.Interfaces;
+    using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.AspNetCore.Mvc.ModelBinding;
     #endregion
@@ -23,6 +24,7 @@
 
         #region Get
         [HttpGet("{symbol}/24hAvgPrice")]
+        [Authorize]
         public async Task<IActionResult> Get24hAvgPrice(string symbol)
         {
             try
@@ -48,6 +50,7 @@
         }
 
         [HttpGet("{symbol}/SimpleMovingAverage")]
+        [Authorize]
         public async Task<IActionResult> GetSimpleMovingAverage(
                                                                 string symbol,
                                                                 [BindRequired, FromQuery(Name = "n")] int numberOfDataPoints,

@@ -2,6 +2,7 @@
 {
     #region Usings
     using Application.Services;
+    using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Mvc;
     #endregion
 
@@ -17,6 +18,7 @@
         }
 
         [HttpPost("start")]
+        [Authorize]
         public async Task<IActionResult> StartWebSocket()
         {
             await _webSocketService.StartAsync(CancellationToken.None);
@@ -24,6 +26,7 @@
         }
 
         [HttpPost("stop")]
+        [Authorize]
         public IActionResult StopWebSocket()
         {
             _webSocketService.Stop();
@@ -31,6 +34,7 @@
         }
 
         [HttpPost("restart")]
+        [Authorize]
         public async Task<IActionResult> RestartWebSocket()
         {
             await _webSocketService.RestartWebSocketAsync();

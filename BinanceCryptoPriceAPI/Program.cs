@@ -11,6 +11,8 @@ builder.Logging.AddDebug();
 
 builder.Services.AddAppDbContext(builder.Configuration);
 builder.Services.AddAppServices();
+builder.Services.AddJwtAuthentication(builder.Configuration);
+builder.Services.AddAppSwagger();
 
 builder.Services.AddControllers()
     .AddXmlSerializerFormatters();
@@ -38,6 +40,7 @@ app.UseMiddleware<GlobalExceptionHandlerMiddleware>();
 
 app.UseHttpsRedirection();
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
