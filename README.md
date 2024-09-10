@@ -34,8 +34,9 @@ Open `appsettings.json` and place the connection string for your PostgreSQL data
 
 5. Run `BinanceCryptoPriceAPI` or `CryptoPriceConsoleApp`
 
-## Run the project on Docker
+## Run the project with Docker
 Follow the instructions below to set up and run the services in Docker containers.
+
 #### Ensure you have the following installed on your system:
   * WSL
   * Docker Desktop for Windows
@@ -67,8 +68,14 @@ This will do the following:
 
 #### 3. Verify that the services are running:
 
-  * The PostgreSQL container should be running on port 5432.
-  * The Binance API container should be accessible on port 8080 (or 8081 as configured).
+You can check if the containers are running with the following command:
+
+  ```bash
+  docker ps
+  ```
+
+  * The `postgresdb` container should be running on port `5432`.
+  * The `binancecryptopriceapi` container should be accessible on port `8080` (or `8081` as configured).
 
 #### 4. Access the API:
 
@@ -102,6 +109,13 @@ The PostgreSQL container uses a Docker volume to store its data persistently, ev
 ### Healthcheck
 A health check is configured for the PostgreSQL service to ensure it is ready before the API container starts. The service will retry for a maximum of 5 times with a 10-second interval between attempts.
 
+  ```yaml
+  healthcheck:
+    test: ["CMD-SHELL", "pg_isready -U postgres"]
+    interval: 10s
+    timeout: 5s
+    retries: 5
+  ```
 
 ## Project Structure
 
